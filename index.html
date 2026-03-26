@@ -1,0 +1,3046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Altin Ademi · Architecture & Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --bg-card: #0f0f0f;
+  --bg-card2: #141414;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.15);
+  --text: #f0ece4;
+  --text-muted: rgba(240,236,228,0.5);
+  --text-dim: rgba(240,236,228,0.2);
+  --gold: #c9a96e;
+  --gold-light: #e8d5b0;
+  --gold-dim: rgba(201,169,110,0.15);
+  --nav-h: 70px;
+  --r: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* ─── PAGE SYSTEM ─── */
+.page {
+  display: none;
+  min-height: 100vh;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.page.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.page.fade-in {
+  animation: pageIn 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── NAVBAR ─── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  z-index: 1000;
+  background: rgba(8,8,8,0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+  margin-right: 40px;
+}
+.nav-logo-icon {
+  width: 38px; height: 38px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--text);
+}
+.nav-logo-text { line-height: 1.2; }
+.nav-logo-name {
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+.nav-logo-sub {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.nav-links a {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.3s, background 0.3s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--text); }
+.nav-links a.active { color: var(--text); font-weight: 400; }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.nav-contact {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.3s;
+  text-decoration: none;
+}
+.nav-contact:hover { color: var(--text); }
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px;
+  gap: 2px;
+}
+.lang-btn {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  padding: 4px 10px;
+  border-radius: 100px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.3s;
+  background: transparent;
+  border: none;
+  font-family: 'Jost', sans-serif;
+}
+.lang-btn.active {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+/* ─── BACK BUTTON ─── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  margin-bottom: 48px;
+  transition: all 0.3s;
+  background: transparent;
+  font-family: 'Jost', sans-serif;
+}
+.back-btn:hover { color: var(--text); border-color: var(--border-hover); background: rgba(255,255,255,0.03); }
+.back-btn svg { width: 14px; height: 14px; }
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 30px; height: 1px;
+  background: var(--text-dim);
+}
+
+/* ─── HEADING STYLE ─── */
+.display-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.display-title em {
+  font-style: italic;
+  color: var(--gold-light);
+  font-weight: 300;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.section-title em {
+  font-style: italic;
+  color: rgba(240,236,228,0.45);
+}
+
+/* ─── PAGE WRAPPER ─── */
+.page-wrap {
+  padding-top: calc(var(--nav-h) + 40px);
+  padding-bottom: 80px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+/* ─── CARD ─── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  transition: border-color 0.3s, background 0.3s, transform 0.3s;
+}
+.card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card2);
+}
+
+/* ─── BREADCRUMB ─── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 40px;
+}
+.breadcrumb span { cursor: pointer; transition: color 0.3s; }
+.breadcrumb span:hover { color: var(--text-muted); }
+.breadcrumb .sep { opacity: 0.4; }
+
+/* ─── PROGRESS BAR ─── */
+.prog-bar {
+  height: 2px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--text-muted), var(--text));
+  border-radius: 1px;
+  width: 0;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 40px;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ─────────────────────────────────────────
+   HERO PAGE
+───────────────────────────────────────── */
+#page-hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&q=80') center/cover no-repeat;
+  filter: brightness(0.35) saturate(0.7);
+  transition: transform 8s ease;
+}
+#page-hero:hover .hero-bg { transform: scale(1.03); }
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(8,8,8,0.3) 0%, rgba(8,8,8,0.1) 40%, rgba(8,8,8,0.7) 100%);
+}
+.hero-nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 40px;
+}
+.hero-logo {
+  width: 44px; height: 44px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+}
+.hero-content {
+  position: relative;
+  text-align: center;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero-sub {
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 24px;
+  animation: fadeUp 1s ease 0.2s both;
+}
+.hero-title-top {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(72px, 14vw, 180px);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: #fff;
+  animation: fadeUp 1s ease 0.4s both;
+}
+.hero-title-bottom {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(72px, 14vw, 180px);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.55);
+  animation: fadeUp 1s ease 0.5s both;
+  margin-bottom: 24px;
+}
+.hero-tagline {
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 8px;
+  animation: fadeUp 1s ease 0.6s both;
+}
+.hero-location {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 44px;
+  animation: fadeUp 1s ease 0.65s both;
+}
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 14px 32px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.4s;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.04);
+  animation: fadeUp 1s ease 0.8s both;
+}
+.hero-cta:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  animation: fadeUp 1s ease 1.2s both;
+  cursor: pointer;
+  writing-mode: vertical-lr;
+}
+.hero-year {
+  position: absolute;
+  bottom: 32px;
+  left: 40px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.2);
+  animation: fadeUp 1s ease 1s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────
+   PORTFOLIO PAGE
+───────────────────────────────────────── */
+.portfolio-header {
+  margin-bottom: 48px;
+}
+.portfolio-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.portfolio-title em {
+  font-style: italic;
+  color: rgba(240,236,228,0.4);
+}
+.portfolio-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 500px;
+  line-height: 1.7;
+}
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 56px;
+}
+.stat-item {
+  background: var(--bg-card);
+  padding: 28px 32px;
+  text-align: left;
+}
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.portfolio-card {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 4/3;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.portfolio-card:first-child {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  aspect-ratio: 16/10;
+}
+.portfolio-card:nth-child(2) { aspect-ratio: 4/3; }
+.portfolio-card:nth-child(3) { aspect-ratio: 4/3; }
+.portfolio-card:nth-child(4) { aspect-ratio: 4/3; }
+.portfolio-card:nth-child(5) { aspect-ratio: 4/3; }
+.portfolio-card:nth-child(6) { aspect-ratio: 4/3; }
+.portfolio-card:nth-child(7) { aspect-ratio: 4/3; }
+.portfolio-card:hover { transform: scale(1.02); }
+.portfolio-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.5) saturate(0.8);
+  transition: filter 0.4s, transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.portfolio-card:hover img { filter: brightness(0.65) saturate(1); transform: scale(1.05); }
+.portfolio-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.p-card-num {
+  position: absolute;
+  top: 20px; right: 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.15);
+}
+.p-card-sub {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 6px;
+}
+.p-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: white;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.p-card-line {
+  width: 28px; height: 1px;
+  background: rgba(255,255,255,0.3);
+}
+
+/* ─────────────────────────────────────────
+   ABOUT ME PAGE
+───────────────────────────────────────── */
+.info-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 64px;
+}
+.info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+.info-card-icon { color: var(--text-dim); margin-bottom: 10px; }
+.info-card-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.info-card-value {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.about-two-col {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 60px;
+  margin-bottom: 80px;
+  align-items: start;
+}
+.about-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 300;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+.about-body p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 18px;
+}
+.about-photo {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  aspect-ratio: 3/4;
+}
+.about-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: saturate(0.7);
+}
+.about-photo-label {
+  position: absolute;
+  bottom: 16px; left: 16px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.drives-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.drive-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 36px 28px;
+  transition: border-color 0.3s, background 0.3s;
+}
+.drive-card:hover { border-color: var(--border-hover); background: var(--bg-card2); }
+.drive-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 52px;
+  font-weight: 300;
+  color: rgba(240,236,228,0.07);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.drive-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.drive-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+.about-cta-row {
+  display: flex;
+  gap: 16px;
+}
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text);
+  border: 1px solid var(--border-hover);
+  padding: 14px 28px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: transparent;
+  font-family: 'Jost', sans-serif;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+
+/* ─────────────────────────────────────────
+   ARCHITECTURE PAGE
+───────────────────────────────────────── */
+.arch-hero {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  height: 380px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: transform 0.4s;
+}
+.arch-hero:hover { transform: scale(1.005); }
+.arch-hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.55); transition: filter 0.4s; }
+.arch-hero:hover img { filter: brightness(0.65); }
+.arch-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.proj-tag {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+}
+.proj-name-lg {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 300;
+  color: white;
+  margin-bottom: 16px;
+}
+.proj-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.proj-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
+.proj-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.proj-card {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 3/2.5;
+  transition: transform 0.4s;
+}
+.proj-card:hover { transform: translateY(-4px); }
+.proj-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.5);
+  transition: filter 0.4s, transform 0.5s;
+}
+.proj-card:hover img { filter: brightness(0.65); transform: scale(1.04); }
+.proj-card-inner {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.proj-card-num {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.2);
+}
+.proj-card-tag {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+}
+.proj-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: white;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.proj-card-loc {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ─────────────────────────────────────────
+   PROJECT DETAIL PAGE
+───────────────────────────────────────── */
+.proj-detail-hero {
+  position: relative;
+  height: 70vh;
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.proj-detail-hero img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.55);
+}
+.proj-detail-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.2) 50%, transparent 100%);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.proj-detail-breadcrumb {
+  position: absolute;
+  top: 24px; right: 24px;
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+.proj-detail-status {
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 12px;
+}
+.proj-detail-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 300;
+  color: white;
+  line-height: 0.9;
+  margin-bottom: 16px;
+}
+.proj-detail-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  max-width: 480px;
+  line-height: 1.7;
+}
+.proj-detail-meta {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 0 48px 48px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.meta-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.detail-two-col {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 48px;
+  padding: 60px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 60px;
+}
+.detail-meta-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-content: start;
+}
+.detail-meta-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+.detail-meta-card:last-child:nth-child(odd) { grid-column: 1/-1; }
+.dmc-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.dmc-value {
+  font-size: 18px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  color: var(--text);
+}
+.concept-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 24px;
+  position: relative;
+}
+.concept-quote::before {
+  content: '"';
+  position: absolute;
+  top: 10px; left: 20px;
+  font-size: 80px;
+  color: rgba(255,255,255,0.04);
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 1;
+}
+.design-details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.dd-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px 24px;
+  transition: border-color 0.3s;
+}
+.dd-card:hover { border-color: var(--border-hover); }
+.dd-num {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+.dd-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.dd-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.photo-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.photo-gallery img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: var(--r);
+  filter: brightness(0.85);
+}
+.photo-gallery-full {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: var(--r);
+  filter: brightness(0.85);
+  margin-bottom: 12px;
+}
+
+/* ─────────────────────────────────────────
+   FREELANCE PAGE
+───────────────────────────────────────── */
+.freelance-featured {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  height: 340px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: transform 0.4s;
+}
+.freelance-featured:hover { transform: scale(1.005); }
+.freelance-featured img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5); transition: filter 0.4s; }
+.freelance-featured:hover img { filter: brightness(0.6); }
+.freelance-featured-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, transparent 60%);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.ff-tag { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.ff-name { font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 300; color: white; margin-bottom: 14px; }
+.ff-meta { display: flex; gap: 16px; }
+.ff-meta span { font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 5px; }
+.freelance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.fl-card {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 16/9;
+  transition: transform 0.4s;
+}
+.fl-card:hover { transform: translateY(-4px); }
+.fl-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5); transition: filter 0.4s, transform 0.5s; }
+.fl-card:hover img { filter: brightness(0.65); transform: scale(1.04); }
+.fl-card-inner {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.fl-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: white; margin-bottom: 4px; }
+.fl-loc { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* ─────────────────────────────────────────
+   CREATIVE WORK PAGE
+───────────────────────────────────────── */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.filter-tab {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: transparent;
+  font-family: 'Jost', sans-serif;
+}
+.filter-tab:hover { border-color: var(--border-hover); color: var(--text); }
+.filter-tab.active { background: rgba(255,255,255,0.08); color: var(--text); border-color: rgba(255,255,255,0.2); }
+.creative-masonry {
+  columns: 4;
+  column-gap: 12px;
+}
+.creative-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.3s;
+}
+.creative-item:hover { transform: scale(1.02); }
+.creative-item img { width: 100%; display: block; filter: brightness(0.8); transition: filter 0.3s; }
+.creative-item:hover img { filter: brightness(1); }
+
+/* ─────────────────────────────────────────
+   SKILLS PAGE
+───────────────────────────────────────── */
+.competencies-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 48px;
+}
+.comp-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+  transition: border-color 0.3s;
+}
+.comp-card:hover { border-color: var(--border-hover); }
+.comp-icon {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.comp-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.comp-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.skills-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.skills-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+}
+.skills-block-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+}
+.skill-row { margin-bottom: 20px; }
+.skill-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.skill-name { font-size: 14px; color: var(--text); }
+.skill-pct { font-size: 12px; color: var(--text-muted); }
+.skill-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.creative-pills {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 32px;
+}
+.pills-title {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+.pills-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 100px;
+  transition: all 0.3s;
+}
+.pill:hover { border-color: var(--border-hover); color: var(--text); }
+.pill::before { content: '◈'; font-size: 8px; color: var(--text-dim); }
+
+/* ─────────────────────────────────────────
+   CV PAGE
+───────────────────────────────────────── */
+.cv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.cv-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.4s;
+}
+.cv-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card2);
+  transform: translateY(-3px);
+}
+.cv-card-icon {
+  width: 44px; height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+  margin-bottom: 18px;
+  font-size: 18px;
+}
+.cv-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.cv-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.cv-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 16px;
+  transition: color 0.3s;
+}
+.cv-card:hover .cv-card-link { color: var(--text-muted); }
+
+/* ─────────────────────────────────────────
+   CV CAREER SUMMARY SUB-PAGE
+───────────────────────────────────────── */
+.career-quote-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 40px;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+}
+.career-quote-block::before {
+  content: '"';
+  position: absolute;
+  top: -10px; left: 20px;
+  font-size: 160px;
+  color: rgba(255,255,255,0.02);
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 1;
+  pointer-events: none;
+}
+.cq-main {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.cq-body { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+.timeline {
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: 60px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 12px; bottom: 12px; left: 8px;
+  width: 1px;
+  background: var(--border);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 40px;
+}
+.timeline-dot {
+  position: absolute;
+  left: -36px; top: 8px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  border: 2px solid var(--bg);
+}
+.timeline-badge {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #5bc4a0;
+  border: 1px solid rgba(91,196,160,0.2);
+  background: rgba(91,196,160,0.05);
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 8px;
+}
+.timeline-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.timeline-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+.values-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.value-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  transition: border-color 0.3s;
+}
+.value-card:hover { border-color: var(--border-hover); }
+.value-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.value-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+/* ─────────────────────────────────────────
+   CONTACT PAGE
+───────────────────────────────────────── */
+.contact-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+}
+.contact-direct {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 32px;
+  margin-bottom: 16px;
+}
+.contact-title-block {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.contact-item:last-child { border-bottom: none; }
+.contact-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.contact-item-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+.contact-item-value { font-size: 14px; color: var(--text); }
+.social-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px 32px;
+}
+.social-title { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; }
+.social-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.social-link {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.social-link:hover { border-color: var(--border-hover); color: var(--text); }
+.contact-form {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 36px;
+}
+.form-title { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 28px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.form-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+.form-input, .form-textarea {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  padding: 10px 0;
+  outline: none;
+  transition: border-color 0.3s;
+  width: 100%;
+}
+.form-input:focus, .form-textarea:focus { border-color: rgba(255,255,255,0.3); }
+.form-textarea { resize: none; height: 100px; }
+.form-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--text);
+  border: none;
+  padding: 14px 32px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Jost', sans-serif;
+  margin-top: 12px;
+}
+.form-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+/* ─── COLOR GRADIENT ACCENTS ─── */
+.grad-orb {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.04;
+  z-index: 0;
+}
+.orb1 { width: 600px; height: 600px; background: #c9a96e; top: -200px; right: -100px; }
+.orb2 { width: 500px; height: 500px; background: #6e9ec9; bottom: -100px; left: -100px; }
+.orb3 { width: 400px; height: 400px; background: #a96ec9; top: 40%; left: 30%; }
+
+/* ─── MOBILE MENU ─── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: auto;
+}
+.hamburger span {
+  display: block;
+  width: 22px; height: 1.5px;
+  background: var(--text-muted);
+  transition: all 0.3s;
+}
+
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-links, .nav-right { display: none; }
+  .hamburger { display: flex; }
+  .page-wrap { padding-left: 20px; padding-right: 20px; }
+  .portfolio-grid { grid-template-columns: 1fr 1fr; }
+  .info-cards-row { grid-template-columns: 1fr 1fr; }
+  .about-two-col { grid-template-columns: 1fr; }
+  .drives-grid { grid-template-columns: 1fr; }
+  .proj-grid { grid-template-columns: 1fr 1fr; }
+  .skills-two-col { grid-template-columns: 1fr; }
+  .competencies-grid { grid-template-columns: 1fr 1fr; }
+  .contact-two-col { grid-template-columns: 1fr; }
+  .cv-grid { grid-template-columns: 1fr 1fr; }
+  .values-grid { grid-template-columns: 1fr; }
+  .design-details-grid { grid-template-columns: 1fr 1fr; }
+  .freelance-grid { grid-template-columns: 1fr; }
+  .creative-masonry { columns: 2; }
+  .stats-bar { grid-template-columns: 1fr 1fr; }
+  .hero-title-top, .hero-title-bottom { font-size: clamp(60px, 18vw, 120px); }
+  .detail-two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- GRADIENT ORBS -->
+<div class="grad-orb orb1"></div>
+<div class="grad-orb orb2"></div>
+<div class="grad-orb orb3"></div>
+
+<!-- ─── NAV ─── -->
+<nav id="main-nav" style="display:none;">
+  <div class="nav-logo" onclick="goTo('portfolio')">
+    <div class="nav-logo-icon">A</div>
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">ALTIN<br>ADEMI</div>
+      <div class="nav-logo-sub">Architecture</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a onclick="goTo('about')" data-page="about" id="nav-about"></a>
+    <a onclick="goTo('architecture')" data-page="architecture" id="nav-architecture"></a>
+    <a onclick="goTo('freelance')" data-page="freelance" id="nav-freelance"></a>
+    <a onclick="goTo('creative')" data-page="creative" id="nav-creative"></a>
+    <a onclick="goTo('skills')" data-page="skills" id="nav-skills"></a>
+    <a onclick="goTo('cv')" data-page="cv" id="nav-cv"></a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-contact" onclick="goTo('contact')" id="nav-contact"></a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('sq')">SQ</button>
+      <button class="lang-btn" onclick="setLang('mk')">MK</button>
+    </div>
+  </div>
+  <div class="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO PAGE
+══════════════════════════════════════════ -->
+<div id="page-hero" class="page active">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-nav">
+    <div class="hero-logo">A</div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('sq')">SQ</button>
+      <button class="lang-btn" onclick="setLang('mk')">MK</button>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-sub" id="h-sub">DESIGNING SPACES THAT INSPIRE</div>
+    <div class="hero-title-top">ALTIN</div>
+    <div class="hero-title-bottom">ADEMI</div>
+    <div class="hero-tagline" id="h-tag">ARCHITECTURE &amp; DESIGN</div>
+    <div class="hero-location">SKOPJE · NORTH MACEDONIA</div>
+    <div class="hero-cta" onclick="goTo('portfolio')">
+      <span id="h-cta">EXPLORE MY PORTFOLIO</span>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="hero-year">© 2026</div>
+  <div class="hero-scroll" onclick="goTo('portfolio')">SCROLL</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PORTFOLIO PAGE
+══════════════════════════════════════════ -->
+<div id="page-portfolio" class="page">
+  <div class="page-wrap">
+    <div class="portfolio-header">
+      <div class="section-label" id="ptf-lbl">PORTFOLIO</div>
+      <div class="portfolio-title">Architecture &amp; <br><em>Design Work</em></div>
+      <p class="portfolio-desc" id="ptf-desc" style="margin-top:16px;">A curated collection of academic projects, freelance commissions, and creative experiments exploring the intersection of form, space, and human experience.</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-num">4+</div>
+        <div class="stat-label" id="s1"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">3+</div>
+        <div class="stat-label" id="s2"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">5+</div>
+        <div class="stat-label" id="s3"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">3</div>
+        <div class="stat-label" id="s4"></div>
+      </div>
+    </div>
+
+    <div class="portfolio-grid">
+      <div class="portfolio-card" onclick="goTo('about')" style="grid-column:1/2;grid-row:1/2;aspect-ratio:16/9;">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80" alt="About">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">01</div>
+          <div class="p-card-sub" id="pc1s">STUDENT ARCHITECT · NORTH MACEDONIA</div>
+          <div class="p-card-title" id="pc1t">About Me</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+      <div class="portfolio-card" onclick="goTo('architecture')">
+        <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80" alt="Architecture">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">02</div>
+          <div class="p-card-sub" id="pc2s">FEATURED PROJECTS</div>
+          <div class="p-card-title" id="pc2t">Architecture</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+      <div class="portfolio-card" onclick="goTo('freelance')">
+        <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80" alt="Freelance">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">03</div>
+          <div class="p-card-sub" id="pc3s">CLIENT WORK</div>
+          <div class="p-card-title" id="pc3t">Freelance Work</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+      <div class="portfolio-card" onclick="goTo('creative')">
+        <img src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=800&q=80" alt="Creative">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">04</div>
+          <div class="p-card-sub" id="pc4s">DESIGN EXPERIMENTS</div>
+          <div class="p-card-title" id="pc4t">Creative Work</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+      <div class="portfolio-card" onclick="goTo('skills')">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Skills">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">05</div>
+          <div class="p-card-sub" id="pc5s">TECHNICAL EXPERTISE</div>
+          <div class="p-card-title" id="pc5t">Skills</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+      <div class="portfolio-card" onclick="goTo('cv')">
+        <img src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=800&q=80" alt="CV">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">06</div>
+          <div class="p-card-sub" id="pc6s">PROFESSIONAL JOURNEY</div>
+          <div class="p-card-title" id="pc6t">Curriculum Vitae</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+      <div class="portfolio-card" onclick="goTo('contact')" style="grid-column:3/4;">
+        <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80" alt="Contact">
+        <div class="portfolio-card-overlay">
+          <div class="p-card-num">07</div>
+          <div class="p-card-sub" id="pc7s">GET IN TOUCH</div>
+          <div class="p-card-title" id="pc7t">Contact</div>
+          <div class="p-card-line"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABOUT ME PAGE
+══════════════════════════════════════════ -->
+<div id="page-about" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="info-cards-row">
+      <div class="info-card">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="info-card-label" id="ic1l">EDUCATION</div>
+        <div class="info-card-value">B.Arch · SEEU, North Macedonia</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 4 10 14.5 14.5 0 0 0-4 10"/><path d="M2 12h20"/></svg>
+        </div>
+        <div class="info-card-label" id="ic2l">LOCATION</div>
+        <div class="info-card-value">Skopje · North Macedonia</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div class="info-card-label" id="ic3l">FOCUS</div>
+        <div class="info-card-value">Parametric &amp; Residential Design</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="info-card-label" id="ic4l">LANGUAGES</div>
+        <div class="info-card-value">Albanian · Macedonian · English</div>
+      </div>
+    </div>
+
+    <div class="section-label" id="wia-lbl">WHO I AM</div>
+    <div class="about-two-col">
+      <div>
+        <div class="about-quote" id="about-quote">Architecture is not just a profession — it's the art of shaping human experience.</div>
+        <div class="about-body">
+          <p id="ab1">I am Altin Ademi, a student architect from North Macedonia currently pursuing a Bachelor of Architecture at South East European University (SEEU). My work sits at the intersection of technical precision and creative ambition — exploring how form, light, and material come together to create meaningful space.</p>
+          <p id="ab2">My portfolio spans academic studio projects, freelance residential commissions, competition entries, and creative experiments. I am deeply drawn to parametric design, sustainable urbanism, and the expressive potential of architectural visualization.</p>
+          <p id="ab3">Fluent in Albanian, Macedonian, and English, I work across cultures and contexts — always with the same goal: to create architecture that is technically rigorous, environmentally conscious, and emotionally resonant.</p>
+        </div>
+      </div>
+      <div class="about-photo">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="Altin Ademi">
+        <div class="about-photo-label" id="apl">AT THE STUDIO</div>
+      </div>
+    </div>
+
+    <div class="section-label" id="wdm-lbl">WHAT DRIVES ME</div>
+    <div class="drives-grid">
+      <div class="drive-card">
+        <div class="drive-num">01</div>
+        <div class="drive-title" id="d1t">Parametric Design</div>
+        <div class="drive-desc" id="d1d">I believe computational tools unlock forms and efficiencies impossible to reach through intuition alone — algorithms as creative partners.</div>
+      </div>
+      <div class="drive-card">
+        <div class="drive-num">02</div>
+        <div class="drive-title" id="d2t">Sustainable Thinking</div>
+        <div class="drive-desc" id="d2d">Every decision carries an environmental consequence. I design with climate, material, and long-term impact always in mind.</div>
+      </div>
+      <div class="drive-card">
+        <div class="drive-num">03</div>
+        <div class="drive-title" id="d3t">Human Experience</div>
+        <div class="drive-desc" id="d3d">Great architecture is felt before it is understood. I design for emotion — for the way a space makes people feel.</div>
+      </div>
+    </div>
+
+    <div class="about-cta-row">
+      <button class="btn-outline" onclick="goTo('cv')"><span id="btncv">CURRICULUM VITAE</span> →</button>
+      <button class="btn-outline" onclick="goTo('contact')"><span id="btnct">CONTACT</span> →</button>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ARCHITECTURE PAGE
+══════════════════════════════════════════ -->
+<div id="page-architecture" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf2">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="section-label" id="arch-lbl">FEATURED PROJECTS</div>
+    <div class="section-title" style="margin-bottom:16px;">Architecture<br><em>Projects</em></div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:48px;" id="arch-desc">Academic and conceptual projects exploring high-rise design, urban planning, civic architecture, and experimental computational form.</p>
+
+    <!-- Featured Project -->
+    <div class="arch-hero" onclick="goTo('project-cynthalor')">
+      <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600&q=80" alt="Cynthalor Residence">
+      <div class="arch-hero-overlay">
+        <div class="proj-tag" id="at1">ACADEMIC PROJECT</div>
+        <div class="proj-name-lg">Cynthalor Residence</div>
+        <div class="proj-meta-row">
+          <div class="proj-meta-item">📍 <span>North Macedonia</span></div>
+          <div class="proj-meta-item">📅 <span>2025</span></div>
+          <div class="proj-meta-item">⬜ <span>3,200 m²</span></div>
+          <div class="proj-meta-item">🏠 <span>Residential / Mixed-Use</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj-grid">
+      <div class="proj-card" onclick="goTo('project-tini')">
+        <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80" alt="Tini Residence">
+        <div class="proj-card-inner">
+          <div class="proj-card-num">02</div>
+          <div class="proj-card-tag">COLLECTIVE RESIDENTIAL / MIXED-USE</div>
+          <div class="proj-card-name">Tini Residence</div>
+          <div class="proj-card-loc">North Macedonia · 2025</div>
+        </div>
+      </div>
+      <div class="proj-card" onclick="goTo('project-tower')">
+        <img src="https://images.unsplash.com/photo-1555636222-cae831e670b3?w=800&q=80" alt="Tower Project">
+        <div class="proj-card-inner">
+          <div class="proj-card-num">03</div>
+          <div class="proj-card-tag">MIXED-USE HIGH-RISE</div>
+          <div class="proj-card-name">Tower Project</div>
+          <div class="proj-card-loc">Prishtina, Kosovo · 2025</div>
+        </div>
+      </div>
+      <div class="proj-card" onclick="goTo('project-admin')">
+        <img src="https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?w=800&q=80" alt="Administrative Building">
+        <div class="proj-card-inner">
+          <div class="proj-card-num">04</div>
+          <div class="proj-card-tag">CIVIC / GOVERNMENT</div>
+          <div class="proj-card-name">Administrative Building</div>
+          <div class="proj-card-loc">Skopje, North Macedonia · 2024</div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80" alt="Urban Complex">
+        <div class="proj-card-inner">
+          <div class="proj-card-num">05</div>
+          <div class="proj-card-tag">URBAN PLANNING</div>
+          <div class="proj-card-name">Urban Complex</div>
+          <div class="proj-card-loc">Tetovo, North Macedonia · 2024</div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <img src="https://images.unsplash.com/photo-1579547945413-497e1b99dac0?w=800&q=80" alt="Parametric Tower">
+        <div class="proj-card-inner">
+          <div class="proj-card-num">06</div>
+          <div class="proj-card-tag">PARAMETRIC / CONCEPTUAL</div>
+          <div class="proj-card-name">Parametric Tower</div>
+          <div class="proj-card-loc">Conceptual · 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROJECT DETAIL — CYNTHALOR RESIDENCE
+══════════════════════════════════════════ -->
+<div id="page-project-cynthalor" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('architecture')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-arch">BACK TO ARCHITECTURE</span>
+    </button>
+
+    <div class="proj-detail-hero">
+      <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600&q=80" alt="Cynthalor Residence">
+      <div class="proj-detail-overlay">
+        <div class="proj-detail-breadcrumb">
+          <span onclick="goTo('portfolio')">PORTFOLIO</span>
+          <span class="sep">›</span>
+          <span onclick="goTo('architecture')">ARCHITECTURE</span>
+          <span class="sep">›</span>
+          <span>CYNTHALOR RESIDENCE</span>
+        </div>
+        <div class="proj-detail-status">ACADEMIC PROJECT</div>
+        <div class="proj-detail-name">Cynthalor<br>Residence</div>
+        <div class="proj-detail-desc">A P+4 mixed-use residential building integrating ground-floor commercial spaces with contemporary urban apartments.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;">
+          <div class="meta-tag">📍 North Macedonia</div>
+          <div class="meta-tag">📅 2025</div>
+          <div class="meta-tag">⬜ 3,200 m²</div>
+          <div class="meta-tag">🏠 Residential / Mixed-Use</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-two-col">
+      <div class="detail-meta-cards">
+        <div class="detail-meta-card">
+          <div class="dmc-label">LOCATION</div>
+          <div class="dmc-value">North Macedonia</div>
+        </div>
+        <div class="detail-meta-card">
+          <div class="dmc-label">YEAR</div>
+          <div class="dmc-value">2025</div>
+        </div>
+        <div class="detail-meta-card">
+          <div class="dmc-label">AREA</div>
+          <div class="dmc-value">3,200 m²</div>
+        </div>
+        <div class="detail-meta-card">
+          <div class="dmc-label">TYPE</div>
+          <div class="dmc-value">Residential / Mixed-Use</div>
+        </div>
+        <div class="detail-meta-card">
+          <div class="dmc-label">STATUS</div>
+          <div class="dmc-value">Academic Project</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">CONCEPT</div>
+        <div class="concept-quote">
+          "Cynthalor Residence is a multifunctional urban building designed around the principles of contemporary residential living integrated with ground-floor commercial activity. The P+4 structure features four residential floors above a commercial podium, with full-perimeter balconies that establish a strong horizontal rhythm across all facades."
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-dim);font-size:12px;letter-spacing:0.1em;">01</span><span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text);">Structure</span><span style="font-size:12px;color:var(--text-muted);">Reinforced concrete frame, P+4</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-dim);font-size:12px;letter-spacing:0.1em;">02</span><span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text);">Facade</span><span style="font-size:12px;color:var(--text-muted);">Warm grey rendered panels</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-dim);font-size:12px;letter-spacing:0.1em;">03</span><span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text);">Ground Floor</span><span style="font-size:12px;color:var(--text-muted);">Active commercial frontage</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0;"><span style="color:var(--text-dim);font-size:12px;letter-spacing:0.1em;">04</span><span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text);">Balconies</span><span style="font-size:12px;color:var(--text-muted);">Full-perimeter cantilevered</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:24px;">DESIGN DETAILS</div>
+    <div class="design-details-grid" style="margin-bottom:48px;">
+      <div class="dd-card"><div class="dd-num">01</div><div class="dd-title">Structure</div><div class="dd-desc">Reinforced concrete frame, P+4 floors above commercial podium</div></div>
+      <div class="dd-card"><div class="dd-num">02</div><div class="dd-title">Facade</div><div class="dd-desc">Rendered panels in warm grey with dark aluminium frames and glass balustrades</div></div>
+      <div class="dd-card"><div class="dd-num">03</div><div class="dd-title">Ground Floor</div><div class="dd-desc">Active commercial frontage with large glazed shopfronts along all street-facing elevations</div></div>
+      <div class="dd-card"><div class="dd-num">04</div><div class="dd-title">Balconies</div><div class="dd-desc">Full-perimeter cantilevered balconies on all residential floors</div></div>
+      <div class="dd-card"><div class="dd-num">05</div><div class="dd-title">Circulation</div><div class="dd-desc">Central core with elevator and staircase serving all residential floors</div></div>
+      <div class="dd-card"><div class="dd-num">06</div><div class="dd-title">Landscape</div><div class="dd-desc">Street-level greenery integrated along the building perimeter</div></div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:24px;">PROJECT IMAGES</div>
+    <img class="photo-gallery-full" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1400&q=80" alt="Cynthalor view 1">
+    <div class="photo-gallery">
+      <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80" alt="Cynthalor view 2">
+      <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80" alt="Cynthalor view 3">
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROJECT DETAIL — TINI RESIDENCE
+══════════════════════════════════════════ -->
+<div id="page-project-tini" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('architecture')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>BACK TO ARCHITECTURE</span>
+    </button>
+    <div class="proj-detail-hero">
+      <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=80" alt="Tini Residence">
+      <div class="proj-detail-overlay">
+        <div class="proj-detail-status">COLLECTIVE RESIDENTIAL / MIXED-USE</div>
+        <div class="proj-detail-name">Tini<br>Residence</div>
+        <div class="proj-detail-desc">A collective residential complex with mixed-use ground floor designed for urban living in North Macedonia.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;">
+          <div class="meta-tag">📍 North Macedonia</div>
+          <div class="meta-tag">📅 2025</div>
+          <div class="meta-tag">⬜ 4,800 m²</div>
+          <div class="meta-tag">🏢 Collective Residential</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-two-col">
+      <div class="detail-meta-cards">
+        <div class="detail-meta-card"><div class="dmc-label">LOCATION</div><div class="dmc-value">North Macedonia</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">YEAR</div><div class="dmc-value">2025</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">AREA</div><div class="dmc-value">4,800 m²</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">TYPE</div><div class="dmc-value">Collective Residential</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">STATUS</div><div class="dmc-value">Academic Project</div></div>
+      </div>
+      <div>
+        <div class="section-label">CONCEPT</div>
+        <div class="concept-quote">"Tini Residence explores the dialogue between collective living and individual identity — creating a building that functions as a small urban neighborhood."</div>
+      </div>
+    </div>
+    <div class="section-label" style="margin-bottom:24px;">PROJECT IMAGES</div>
+    <img class="photo-gallery-full" src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1400&q=80" alt="Tini">
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROJECT DETAIL — TOWER PROJECT
+══════════════════════════════════════════ -->
+<div id="page-project-tower" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('architecture')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>BACK TO ARCHITECTURE</span>
+    </button>
+    <div class="proj-detail-hero">
+      <img src="https://images.unsplash.com/photo-1555636222-cae831e670b3?w=1600&q=80" alt="Tower Project">
+      <div class="proj-detail-overlay">
+        <div class="proj-detail-status">MIXED-USE HIGH-RISE</div>
+        <div class="proj-detail-name">Tower<br>Project</div>
+        <div class="proj-detail-desc">A mixed-use high-rise tower exploring the intersection of commercial and residential programming in a vertical city.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;">
+          <div class="meta-tag">📍 Prishtina, Kosovo</div>
+          <div class="meta-tag">📅 2025</div>
+          <div class="meta-tag">⬜ 18,000 m²</div>
+          <div class="meta-tag">🏙️ Mixed-Use High-Rise</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-two-col">
+      <div class="detail-meta-cards">
+        <div class="detail-meta-card"><div class="dmc-label">LOCATION</div><div class="dmc-value">Prishtina, Kosovo</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">YEAR</div><div class="dmc-value">2025</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">AREA</div><div class="dmc-value">18,000 m²</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">TYPE</div><div class="dmc-value">Mixed-Use High-Rise</div></div>
+      </div>
+      <div>
+        <div class="section-label">CONCEPT</div>
+        <div class="concept-quote">"A vertical city within a city — the Tower Project stacks commercial, hotel, and residential programs into a single iconic form that redefines the Prishtina skyline."</div>
+      </div>
+    </div>
+    <img class="photo-gallery-full" src="https://images.unsplash.com/photo-1555636222-cae831e670b3?w=1400&q=80" alt="Tower">
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROJECT DETAIL — ADMINISTRATIVE BUILDING
+══════════════════════════════════════════ -->
+<div id="page-project-admin" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('architecture')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>BACK TO ARCHITECTURE</span>
+    </button>
+    <div class="proj-detail-hero">
+      <img src="https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?w=1600&q=80" alt="Administrative Building">
+      <div class="proj-detail-overlay">
+        <div class="proj-detail-status">CIVIC / GOVERNMENT</div>
+        <div class="proj-detail-name">Administrative<br>Building</div>
+        <div class="proj-detail-desc">A civic administrative building exploring transparency, accessibility, and institutional identity through contemporary architecture.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;">
+          <div class="meta-tag">📍 Skopje, North Macedonia</div>
+          <div class="meta-tag">📅 2024</div>
+          <div class="meta-tag">🏛️ Civic / Government</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-two-col">
+      <div class="detail-meta-cards">
+        <div class="detail-meta-card"><div class="dmc-label">LOCATION</div><div class="dmc-value">Skopje, North Macedonia</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">YEAR</div><div class="dmc-value">2024</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">TYPE</div><div class="dmc-value">Civic / Government</div></div>
+      </div>
+      <div>
+        <div class="section-label">CONCEPT</div>
+        <div class="concept-quote">"The Administrative Building seeks to express civic dignity through a transparent façade that invites the public in — architecture as democratic gesture."</div>
+      </div>
+    </div>
+    <img class="photo-gallery-full" src="https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?w=1400&q=80" alt="Admin Building">
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FREELANCE WORK PAGE
+══════════════════════════════════════════ -->
+<div id="page-freelance" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf3">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="section-label" id="fl-lbl">CLIENT WORK</div>
+    <div class="section-title" style="margin-bottom:16px;">Freelance<br><em>Projects</em></div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:48px;" id="fl-desc">Private residential commissions designed with attention to the client's vision, the site's character, and the harmony between built form and landscape.</p>
+
+    <div class="freelance-featured" onclick="goTo('project-villa')">
+      <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=80" alt="Villa Aurora">
+      <div class="freelance-featured-overlay">
+        <div class="ff-tag">FEATURED PROJECT</div>
+        <div class="ff-name">Villa Aurora</div>
+        <div class="ff-meta">
+          <span>📍 Prishtina, Kosovo</span>
+          <span>📅 2025</span>
+          <span>⬜ 350 m²</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="freelance-grid">
+      <div class="fl-card" onclick="goTo('project-casanova')">
+        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80" alt="Casa Nova">
+        <div class="fl-card-inner">
+          <div class="fl-name">Casa Nova</div>
+          <div class="fl-loc">📍 Tetovo, North Macedonia &nbsp;·&nbsp; ⬜ 280 m²</div>
+        </div>
+      </div>
+      <div class="fl-card">
+        <img src="https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?w=800&q=80" alt="Mountain Retreat">
+        <div class="fl-card-inner">
+          <div class="fl-name">Mountain Retreat</div>
+          <div class="fl-loc">📍 Mavrovo, North Macedonia &nbsp;·&nbsp; ⬜ 220 m²</div>
+        </div>
+      </div>
+      <div class="fl-card">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" alt="Lake House">
+        <div class="fl-card-inner">
+          <div class="fl-name">Lake House</div>
+          <div class="fl-loc">📍 Ohrid, North Macedonia &nbsp;·&nbsp; ⬜ 190 m²</div>
+        </div>
+      </div>
+      <div class="fl-card">
+        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80" alt="Urban Villa">
+        <div class="fl-card-inner">
+          <div class="fl-name">Urban Villa</div>
+          <div class="fl-loc">📍 Skopje, North Macedonia &nbsp;·&nbsp; ⬜ 310 m²</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- Freelance Project Detail: Villa Aurora -->
+<div id="page-project-villa" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('freelance')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>BACK TO FREELANCE</span>
+    </button>
+    <div class="proj-detail-hero">
+      <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=80" alt="Villa Aurora">
+      <div class="proj-detail-overlay">
+        <div class="proj-detail-status">CLIENT WORK · RESIDENTIAL</div>
+        <div class="proj-detail-name">Villa<br>Aurora</div>
+        <div class="proj-detail-desc">A contemporary villa designed to blend seamlessly with the landscape of Prishtina, Kosovo.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;">
+          <div class="meta-tag">📍 Prishtina, Kosovo</div>
+          <div class="meta-tag">📅 2025</div>
+          <div class="meta-tag">⬜ 350 m²</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-two-col">
+      <div class="detail-meta-cards">
+        <div class="detail-meta-card"><div class="dmc-label">LOCATION</div><div class="dmc-value">Prishtina, Kosovo</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">YEAR</div><div class="dmc-value">2025</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">AREA</div><div class="dmc-value">350 m²</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">CLIENT</div><div class="dmc-value">Private Commission</div></div>
+      </div>
+      <div>
+        <div class="section-label">CONCEPT</div>
+        <div class="concept-quote">"Villa Aurora is designed around light — every room oriented to capture the golden hour, creating spaces that transform throughout the day."</div>
+      </div>
+    </div>
+    <img class="photo-gallery-full" src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1400&q=80" alt="Villa Aurora">
+    <div class="photo-gallery">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" alt="">
+      <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80" alt="">
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- Freelance Project Detail: Casa Nova -->
+<div id="page-project-casanova" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('freelance')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>BACK TO FREELANCE</span>
+    </button>
+    <div class="proj-detail-hero">
+      <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1600&q=80" alt="Casa Nova">
+      <div class="proj-detail-overlay">
+        <div class="proj-detail-status">CLIENT WORK · RESIDENTIAL</div>
+        <div class="proj-detail-name">Casa<br>Nova</div>
+        <div class="proj-detail-desc">A private residence in Tetovo that celebrates warm materials and natural connection.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;">
+          <div class="meta-tag">📍 Tetovo, North Macedonia</div>
+          <div class="meta-tag">📅 2025</div>
+          <div class="meta-tag">⬜ 280 m²</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-two-col">
+      <div class="detail-meta-cards">
+        <div class="detail-meta-card"><div class="dmc-label">LOCATION</div><div class="dmc-value">Tetovo, North Macedonia</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">YEAR</div><div class="dmc-value">2025</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">AREA</div><div class="dmc-value">280 m²</div></div>
+        <div class="detail-meta-card"><div class="dmc-label">CLIENT</div><div class="dmc-value">Private Commission</div></div>
+      </div>
+      <div>
+        <div class="section-label">CONCEPT</div>
+        <div class="concept-quote">"Casa Nova draws from the landscape of Tetovo — raw stone, warm wood, and generous openings that frame views of the Šar Mountains."</div>
+      </div>
+    </div>
+    <img class="photo-gallery-full" src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1400&q=80" alt="Casa Nova">
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CREATIVE WORK PAGE
+══════════════════════════════════════════ -->
+<div id="page-creative" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf4">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="section-label" id="cw-lbl">DESIGN EXPERIMENTS</div>
+    <div class="section-title" style="margin-bottom:16px;">Creative<br><em>Work</em></div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:36px;" id="cw-desc">A collection of drawings, digital experiments, graphic design, and creative explorations beyond the boundaries of traditional architecture.</p>
+
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" data-filter="all" onclick="filterCreative('all')">ALL</button>
+      <button class="filter-tab" data-filter="digital" onclick="filterCreative('digital')">DIGITAL ART</button>
+      <button class="filter-tab" data-filter="sketching" onclick="filterCreative('sketching')">SKETCHING</button>
+      <button class="filter-tab" data-filter="graphic" onclick="filterCreative('graphic')">GRAPHIC DESIGN</button>
+      <button class="filter-tab" data-filter="ai" onclick="filterCreative('ai')">AI ART</button>
+      <button class="filter-tab" data-filter="mixed" onclick="filterCreative('mixed')">MIXED MEDIA</button>
+      <button class="filter-tab" data-filter="technical" onclick="filterCreative('technical')">TECHNICAL ART</button>
+    </div>
+
+    <div class="creative-masonry" id="creative-masonry">
+      <div class="creative-item" data-cat="digital ai">
+        <img src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="graphic mixed">
+        <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500&q=80" alt="" style="aspect-ratio:1;">
+      </div>
+      <div class="creative-item" data-cat="technical">
+        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="ai">
+        <img src="https://images.unsplash.com/photo-1579547945413-497e1b99dac0?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="sketching mixed">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80" alt="" style="aspect-ratio:1;">
+      </div>
+      <div class="creative-item" data-cat="digital">
+        <img src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="technical graphic">
+        <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="sketching">
+        <img src="https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=500&q=80" alt="" style="aspect-ratio:1;">
+      </div>
+      <div class="creative-item" data-cat="mixed ai">
+        <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="digital graphic">
+        <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="technical">
+        <img src="https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?w=500&q=80" alt="">
+      </div>
+      <div class="creative-item" data-cat="ai mixed">
+        <img src="https://images.unsplash.com/photo-1555636222-cae831e670b3?w=500&q=80" alt="">
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SKILLS PAGE
+══════════════════════════════════════════ -->
+<div id="page-skills" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf5">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="section-label" id="sk-lbl">TECHNICAL EXPERTISE</div>
+    <div class="section-title" style="margin-bottom:48px;" id="sk-title">Skills &amp; Expertise</div>
+
+    <div class="section-label" id="cc-lbl">CORE COMPETENCIES</div>
+    <div class="competencies-grid">
+      <div class="comp-card">
+        <div class="comp-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg>
+        </div>
+        <div class="comp-title" id="cc1t">Sustainable Design</div>
+        <div class="comp-desc" id="cc1d">Passive systems, bioclimatic analysis, LEED principles</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="comp-title" id="cc2t">Parametric Design</div>
+        <div class="comp-desc" id="cc2d">Algorithm-driven form generation and optimization</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div class="comp-title" id="cc3t">Urban Planning</div>
+        <div class="comp-desc" id="cc3d">Masterplanning, mobility, green infrastructure</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M3 12h.01M12 3v.01M21 12h-.01M12 21v-.01M18.36 5.64l-.01.01M5.64 5.64l.01.01M18.36 18.36l-.01-.01M5.64 18.36l.01-.01"/></svg>
+        </div>
+        <div class="comp-title" id="cc4t">Creative Direction</div>
+        <div class="comp-desc" id="cc4d">Visual identity, graphics, brand communication</div>
+      </div>
+    </div>
+
+    <div class="skills-two-col">
+      <div class="skills-block">
+        <div class="skills-block-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+          <span id="asw-lbl">ARCHITECTURE SOFTWARE</span>
+        </div>
+        <div class="skill-row">
+          <div class="skill-row-top"><span class="skill-name">Archicad</span><span class="skill-pct">95%</span></div>
+          <div class="skill-sub">Primary BIM Software</div>
+          <div class="prog-bar"><div class="prog-fill" data-width="95"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-row-top"><span class="skill-name">Twinmotion</span><span class="skill-pct">92%</span></div>
+          <div class="skill-sub">Real-time Visualization</div>
+          <div class="prog-bar"><div class="prog-fill" data-width="92"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-row-top"><span class="skill-name">Sketchup</span><span class="skill-pct">88%</span></div>
+          <div class="skill-sub">Conceptual Modeling</div>
+          <div class="prog-bar"><div class="prog-fill" data-width="88"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-row-top"><span class="skill-name">D5 Render</span><span class="skill-pct">85%</span></div>
+          <div class="skill-sub">Photorealistic Rendering</div>
+          <div class="prog-bar"><div class="prog-fill" data-width="85"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-row-top"><span class="skill-name">Revit</span><span class="skill-pct">75%</span></div>
+          <div class="skill-sub">BIM Coordination</div>
+          <div class="prog-bar"><div class="prog-fill" data-width="75"></div></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-row-top"><span class="skill-name">Blender</span><span class="skill-pct">70%</span></div>
+          <div class="skill-sub">3D Modeling &amp; Animation</div>
+          <div class="prog-bar"><div class="prog-fill" data-width="70"></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="skills-block" style="margin-bottom:24px;">
+          <div class="skills-block-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            <span id="csw-lbl">CREATIVE SOFTWARE</span>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-top"><span class="skill-name">Adobe Photoshop</span><span class="skill-pct">90%</span></div>
+            <div class="skill-sub">Image Editing &amp; Compositing</div>
+            <div class="prog-bar"><div class="prog-fill" data-width="90"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-top"><span class="skill-name">Microsoft Office</span><span class="skill-pct">95%</span></div>
+            <div class="skill-sub">Documentation &amp; Presentation</div>
+            <div class="prog-bar"><div class="prog-fill" data-width="95"></div></div>
+          </div>
+        </div>
+
+        <div class="skills-block">
+          <div class="skills-block-title"><span id="lang-lbl">LANGUAGES</span></div>
+          <div class="skill-row">
+            <div class="skill-row-top"><span class="skill-name">Albanian</span><span class="skill-pct">100%</span></div>
+            <div class="skill-sub">Native</div>
+            <div class="prog-bar"><div class="prog-fill" data-width="100"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-top"><span class="skill-name">Macedonian</span><span class="skill-pct">95%</span></div>
+            <div class="skill-sub">Native</div>
+            <div class="prog-bar"><div class="prog-fill" data-width="95"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-top"><span class="skill-name">English</span><span class="skill-pct">85%</span></div>
+            <div class="skill-sub">Professional</div>
+            <div class="prog-bar"><div class="prog-fill" data-width="85"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="creative-pills">
+      <div class="pills-title" id="ca-lbl">CREATIVE ABILITIES</div>
+      <div class="pills-wrap">
+        <div class="pill">Interior Design</div>
+        <div class="pill">Exterior Design</div>
+        <div class="pill">Architectural Visualization</div>
+        <div class="pill">Hand Drawing</div>
+        <div class="pill">Portrait Drawing</div>
+        <div class="pill">Wood Craft</div>
+        <div class="pill">Paper Models</div>
+        <div class="pill">Logo Design</div>
+        <div class="pill">Thumbnail Design</div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CV PAGE (HUB)
+══════════════════════════════════════════ -->
+<div id="page-cv" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf6">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="section-label" id="cv-lbl">PROFESSIONAL DEVELOPMENT</div>
+    <div class="section-title" style="margin-bottom:16px;">Career<br><em>Portfolio</em></div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:48px;" id="cv-desc">Goals, philosophy, achievements and professional development — a complete record of architectural growth and ambition.</p>
+
+    <div class="cv-grid">
+      <div class="cv-card" onclick="goTo('cv-career')">
+        <div class="cv-card-icon">🎯</div>
+        <div class="cv-card-title" id="cv1t">Career Summary &amp; Goals</div>
+        <div class="cv-card-desc" id="cv1d">What architecture means to me and where I see myself in 2–5 years.</div>
+        <div class="cv-card-link" id="cv1l">OPEN →</div>
+      </div>
+      <div class="cv-card" onclick="goTo('cv-philosophy')">
+        <div class="cv-card-icon">💡</div>
+        <div class="cv-card-title" id="cv2t">Professional Philosophy</div>
+        <div class="cv-card-desc" id="cv2d">The principles and values that guide every design decision.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+      <div class="cv-card" onclick="goTo('cv-biography')">
+        <div class="cv-card-icon">📖</div>
+        <div class="cv-card-title" id="cv3t">Professional Biography</div>
+        <div class="cv-card-desc" id="cv3d">Education, timeline of growth, competitions, and experience.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-icon">🔧</div>
+        <div class="cv-card-title" id="cv4t">Skills &amp; Qualities</div>
+        <div class="cv-card-desc" id="cv4d">Architecture software, creative tools, and personal strengths.</div>
+        <div class="cv-card-link" onclick="goTo('skills')">OPEN →</div>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-icon">⭐</div>
+        <div class="cv-card-title" id="cv5t">Achievements</div>
+        <div class="cv-card-desc" id="cv5d">Competitions, recognitions, and milestone accomplishments.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-icon">📄</div>
+        <div class="cv-card-title" id="cv6t">Research &amp; Publications</div>
+        <div class="cv-card-desc" id="cv6d">Academic articles, research projects, and written works.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-icon">👥</div>
+        <div class="cv-card-title" id="cv7t">Conferences &amp; Workshops</div>
+        <div class="cv-card-desc" id="cv7d">Events, seminars, and workshops attended and participated in.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-icon">💙</div>
+        <div class="cv-card-title" id="cv8t">Volunteer Work</div>
+        <div class="cv-card-desc" id="cv8d">Community contributions, social projects, and impact.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-icon">📝</div>
+        <div class="cv-card-title" id="cv9t">Articles &amp; Academic Work</div>
+        <div class="cv-card-desc" id="cv9d">Published articles, reports, school publications, and essays.</div>
+        <div class="cv-card-link">OPEN →</div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CV — CAREER SUMMARY & GOALS
+══════════════════════════════════════════ -->
+<div id="page-cv-career" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('cv')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-cv">BACK TO CV</span>
+    </button>
+
+    <div class="breadcrumb">
+      <span onclick="goTo('portfolio')">PORTFOLIO</span>
+      <span class="sep">›</span>
+      <span onclick="goTo('cv')">CURRICULUM VITAE</span>
+      <span class="sep">›</span>
+      <span>CAREER SUMMARY &amp; GOALS</span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <div style="width:52px;height:52px;border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">🎯</div>
+    </div>
+
+    <div class="section-title" style="margin-bottom:16px;" id="cs-title">Career Summary &amp; Goals</div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:40px;">What matters most in architecture and where I see myself in the next 2–5 years.</p>
+    <div style="width:40px;height:1px;background:var(--border);margin-bottom:48px;"></div>
+
+    <div class="section-label">WHAT ARCHITECTURE MEANS TO ME</div>
+    <div class="career-quote-block" style="margin-bottom:60px;">
+      <div class="cq-main">"Architecture is the most complete art form — it demands mastery of structure, beauty, function, and human emotion simultaneously. For me, it is not a profession but a lifelong commitment."</div>
+      <div class="cq-body">I believe architecture has the power to shape how people feel, move, and connect. Great buildings do not just shelter — they inspire, unite, and endure. My goal is to create work that is technically rigorous, environmentally conscious, and emotionally resonant. I am drawn to the intersection of computational design and traditional craftsmanship, where algorithms meet intuition and innovation meets responsibility.</div>
+    </div>
+
+    <div class="section-label">CAREER GOALS TIMELINE</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#5bc4a0;"></div>
+        <div class="timeline-badge">NOW — 2 YEARS</div>
+        <div class="timeline-title">Graduate &amp; Build Portfolio</div>
+        <div class="timeline-desc">Complete B.Arch at SEEU, strengthen technical skills, and build a portfolio of compelling built and academic work.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#5b8fc4;"></div>
+        <div class="timeline-badge">2–3 YEARS</div>
+        <div class="timeline-title">Join an Architecture Practice</div>
+        <div class="timeline-desc">Work within an innovative studio — preferably internationally — to develop hands-on experience across all project phases from concept through construction documentation.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#c4a05b;"></div>
+        <div class="timeline-badge">3–5 YEARS</div>
+        <div class="timeline-title">Lead Independent Projects</div>
+        <div class="timeline-desc">Take on design lead responsibilities for residential and civic projects, building a reputation for thoughtful, sustainable, and visually compelling architecture.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#c45b8f;"></div>
+        <div class="timeline-badge">5+ YEARS</div>
+        <div class="timeline-title">Establish Own Studio</div>
+        <div class="timeline-desc">Launch a design practice focused on parametric architecture, sustainable urbanism, and community-driven design in the Balkans and beyond.</div>
+      </div>
+    </div>
+
+    <div class="section-label">WHAT I VALUE IN ARCHITECTURE</div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-title">Human-Centered Design</div>
+        <div class="value-desc">Every project must serve its inhabitants with dignity, function, and beauty.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-title">Environmental Responsibility</div>
+        <div class="value-desc">Architecture must respond to climate, landscape, and ecological systems.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-title">Spatial Innovation</div>
+        <div class="value-desc">Push boundaries of form, material, and technology to create surprising spaces.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-title">Cultural Rootedness</div>
+        <div class="value-desc">Honor local identity and heritage while embracing contemporary global thinking.</div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- CV Philosophy Sub-page -->
+<div id="page-cv-philosophy" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('cv')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      BACK TO CV
+    </button>
+    <div class="section-title" style="margin-bottom:16px;">Professional<br><em>Philosophy</em></div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:48px;">The principles and values that guide every design decision.</p>
+    <div class="career-quote-block">
+      <div class="cq-main">"Design is not decoration — it is intention made visible. Every line drawn must serve a purpose, every material must earn its place."</div>
+      <div class="cq-body">I approach every project with three core questions: Who will inhabit this space? How will it change over time? And what is our responsibility to the environment and community? These questions are not constraints — they are the engine of creativity.</div>
+    </div>
+    <div class="values-grid">
+      <div class="value-card"><div class="value-title">Form follows function</div><div class="value-desc">Beauty emerges from solving problems with precision and care.</div></div>
+      <div class="value-card"><div class="value-title">Materials matter</div><div class="value-desc">Honest use of material creates buildings that age with grace.</div></div>
+      <div class="value-card"><div class="value-title">Context is everything</div><div class="value-desc">A building that ignores its surroundings is an act of aggression.</div></div>
+      <div class="value-card"><div class="value-title">Less is more powerful</div><div class="value-desc">Restraint in design creates space for human experience to flourish.</div></div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- CV Biography Sub-page -->
+<div id="page-cv-biography" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('cv')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      BACK TO CV
+    </button>
+    <div class="section-title" style="margin-bottom:16px;">Professional<br><em>Biography</em></div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:48px;">Education, timeline of growth, competitions, and experience.</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#5bc4a0;"></div>
+        <div class="timeline-badge">2022 — PRESENT</div>
+        <div class="timeline-title">B.Arch — South East European University</div>
+        <div class="timeline-desc">Bachelor of Architecture, Tetovo/Skopje, North Macedonia. Focusing on parametric design, sustainable architecture, and urban planning.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-badge">2024</div>
+        <div class="timeline-title">Administrative Building — Academic Studio Project</div>
+        <div class="timeline-desc">Civic building project in Skopje exploring transparency and institutional identity.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-badge">2025</div>
+        <div class="timeline-title">Cynthalor Residence — Thesis Studio Project</div>
+        <div class="timeline-desc">P+4 mixed-use residential building awarded top grade in studio review.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-badge">2024 — 2025</div>
+        <div class="timeline-title">Freelance Architectural Visualization</div>
+        <div class="timeline-desc">3 private residential commissions across North Macedonia and Kosovo.</div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CONTACT PAGE
+══════════════════════════════════════════ -->
+<div id="page-contact" class="page">
+  <div class="page-wrap">
+    <button class="back-btn" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M15 8H1M8 1L1 8l7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="back-ptf7">BACK TO PORTFOLIO</span>
+    </button>
+
+    <div class="section-label" id="ct-lbl">GET IN TOUCH</div>
+    <div class="section-title" style="margin-bottom:16px;" id="ct-title">Let's Connect</div>
+    <p style="color:var(--text-muted);font-size:14px;max-width:520px;margin-bottom:48px;" id="ct-desc">Whether you have a project in mind, want to collaborate, or simply want to talk about architecture — I'd love to hear from you.</p>
+
+    <div class="contact-two-col">
+      <div>
+        <div class="contact-direct">
+          <div class="contact-title-block" id="dc-lbl">DIRECT CONTACT</div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <div class="contact-item-label">EMAIL</div>
+              <div class="contact-item-value">altin.ademi@email.com</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 14a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <div class="contact-item-label">PHONE</div>
+              <div class="contact-item-value">+389 70 000 000</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <div class="contact-item-label">LOCATION</div>
+              <div class="contact-item-value">Tetovo, North Macedonia</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="social-block">
+          <div class="social-title" id="sc-lbl">SOCIAL</div>
+          <div class="social-links">
+            <div class="social-link">INSTAGRAM</div>
+            <div class="social-link">LINKEDIN</div>
+            <div class="social-link">BEHANCE</div>
+            <div class="social-link">ARCHICAD COMMUNITY</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <div class="form-title" id="sm-lbl">SEND A MESSAGE</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" id="fn-lbl">NAME</label>
+            <input type="text" class="form-input" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="em-lbl">EMAIL</label>
+            <input type="email" class="form-input" placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="sb-lbl">SUBJECT</label>
+          <input type="text" class="form-input" placeholder="Project inquiry...">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="msg-lbl">MESSAGE</label>
+          <textarea class="form-textarea" placeholder="Tell me about your project..."></textarea>
+        </div>
+        <button class="form-submit" onclick="alert(langs[currentLang]['send-ok'])">
+          <span id="send-lbl">SEND MESSAGE</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 ALTIN ADEMI — ALL RIGHTS RESERVED</footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+let currentPage = 'hero';
+let currentLang = 'en';
+
+// ─── TRANSLATIONS ───
+const langs = {
+  en: {
+    'nav-about': 'About Me',
+    'nav-architecture': 'Architecture',
+    'nav-freelance': 'Freelance Work',
+    'nav-creative': 'Creative Work',
+    'nav-skills': 'Skills',
+    'nav-cv': 'Curriculum Vitae',
+    'nav-contact': 'Contact',
+    'h-sub': 'DESIGNING SPACES THAT INSPIRE',
+    'h-tag': 'ARCHITECTURE & DESIGN',
+    'h-cta': 'EXPLORE MY PORTFOLIO',
+    'back-ptf': 'BACK TO PORTFOLIO',
+    'back-ptf2': 'BACK TO PORTFOLIO',
+    'back-ptf3': 'BACK TO PORTFOLIO',
+    'back-ptf4': 'BACK TO PORTFOLIO',
+    'back-ptf5': 'BACK TO PORTFOLIO',
+    'back-ptf6': 'BACK TO PORTFOLIO',
+    'back-ptf7': 'BACK TO PORTFOLIO',
+    'back-arch': 'BACK TO ARCHITECTURE',
+    'back-cv': 'BACK TO CV',
+    'ptf-lbl': 'PORTFOLIO',
+    'ptf-desc': 'A curated collection of academic projects, freelance commissions, and creative experiments exploring the intersection of form, space, and human experience.',
+    's1': 'ARCHITECTURE PROJECTS',
+    's2': 'FREELANCE HOMES',
+    's3': 'YEARS LEARNING',
+    's4': 'LANGUAGES',
+    'ic1l': 'EDUCATION', 'ic2l': 'LOCATION', 'ic3l': 'FOCUS', 'ic4l': 'LANGUAGES',
+    'wia-lbl': 'WHO I AM',
+    'about-quote': 'Architecture is not just a profession — it\'s the art of shaping human experience.',
+    'ab1': 'I am Altin Ademi, a student architect from North Macedonia currently pursuing a Bachelor of Architecture at South East European University (SEEU). My work sits at the intersection of technical precision and creative ambition.',
+    'ab2': 'My portfolio spans academic studio projects, freelance residential commissions, competition entries, and creative experiments. I am deeply drawn to parametric design, sustainable urbanism, and architectural visualization.',
+    'ab3': 'Fluent in Albanian, Macedonian, and English, I work across cultures and contexts — always with the same goal: to create architecture that is technically rigorous, environmentally conscious, and emotionally resonant.',
+    'wdm-lbl': 'WHAT DRIVES ME',
+    'd1t': 'Parametric Design', 'd1d': 'I believe computational tools unlock forms and efficiencies impossible to reach through intuition alone.',
+    'd2t': 'Sustainable Thinking', 'd2d': 'Every decision carries an environmental consequence. I design with climate, material, and long-term impact always in mind.',
+    'd3t': 'Human Experience', 'd3d': 'Great architecture is felt before it is understood. I design for emotion — for the way a space makes people feel.',
+    'apl': 'AT THE STUDIO',
+    'btncv': 'CURRICULUM VITAE', 'btnct': 'CONTACT',
+    'arch-lbl': 'FEATURED PROJECTS',
+    'arch-desc': 'Academic and conceptual projects exploring high-rise design, urban planning, civic architecture, and experimental computational form.',
+    'at1': 'ACADEMIC PROJECT',
+    'fl-lbl': 'CLIENT WORK',
+    'fl-desc': 'Private residential commissions designed with attention to the client\'s vision, the site\'s character, and the harmony between built form and landscape.',
+    'cw-lbl': 'DESIGN EXPERIMENTS',
+    'cw-desc': 'A collection of drawings, digital experiments, graphic design, and creative explorations beyond the boundaries of traditional architecture.',
+    'sk-lbl': 'TECHNICAL EXPERTISE',
+    'sk-title': 'Skills & Expertise',
+    'cc-lbl': 'CORE COMPETENCIES',
+    'cc1t': 'Sustainable Design', 'cc1d': 'Passive systems, bioclimatic analysis, LEED principles',
+    'cc2t': 'Parametric Design', 'cc2d': 'Algorithm-driven form generation and optimization',
+    'cc3t': 'Urban Planning', 'cc3d': 'Masterplanning, mobility, green infrastructure',
+    'cc4t': 'Creative Direction', 'cc4d': 'Visual identity, graphics, brand communication',
+    'asw-lbl': 'ARCHITECTURE SOFTWARE',
+    'csw-lbl': 'CREATIVE SOFTWARE',
+    'lang-lbl': 'LANGUAGES',
+    'ca-lbl': 'CREATIVE ABILITIES',
+    'cv-lbl': 'PROFESSIONAL DEVELOPMENT',
+    'cv-desc': 'Goals, philosophy, achievements and professional development — a complete record of architectural growth and ambition.',
+    'cv1t': 'Career Summary & Goals', 'cv1d': 'What architecture means to me and where I see myself in 2–5 years.', 'cv1l': 'OPEN →',
+    'cv2t': 'Professional Philosophy', 'cv2d': 'The principles and values that guide every design decision.',
+    'cv3t': 'Professional Biography', 'cv3d': 'Education, timeline of growth, competitions, and experience.',
+    'cv4t': 'Skills & Qualities', 'cv4d': 'Architecture software, creative tools, and personal strengths.',
+    'cv5t': 'Achievements', 'cv5d': 'Competitions, recognitions, and milestone accomplishments.',
+    'cv6t': 'Research & Publications', 'cv6d': 'Academic articles, research projects, and written works.',
+    'cv7t': 'Conferences & Workshops', 'cv7d': 'Events, seminars, and workshops attended and participated in.',
+    'cv8t': 'Volunteer Work', 'cv8d': 'Community contributions, social projects, and impact.',
+    'cv9t': 'Articles & Academic Work', 'cv9d': 'Published articles, reports, school publications, and essays.',
+    'cs-title': 'Career Summary & Goals',
+    'ct-lbl': 'GET IN TOUCH',
+    'ct-title': "Let's Connect",
+    'ct-desc': "Whether you have a project in mind, want to collaborate, or simply want to talk about architecture — I'd love to hear from you.",
+    'dc-lbl': 'DIRECT CONTACT',
+    'sc-lbl': 'SOCIAL',
+    'sm-lbl': 'SEND A MESSAGE',
+    'fn-lbl': 'NAME', 'em-lbl': 'EMAIL', 'sb-lbl': 'SUBJECT', 'msg-lbl': 'MESSAGE',
+    'send-lbl': 'SEND MESSAGE',
+    'send-ok': 'Message sent! I will get back to you soon.',
+    'pc1s':'STUDENT ARCHITECT · NORTH MACEDONIA','pc1t':'About Me',
+    'pc2s':'FEATURED PROJECTS','pc2t':'Architecture',
+    'pc3s':'CLIENT WORK','pc3t':'Freelance Work',
+    'pc4s':'DESIGN EXPERIMENTS','pc4t':'Creative Work',
+    'pc5s':'TECHNICAL EXPERTISE','pc5t':'Skills',
+    'pc6s':'PROFESSIONAL JOURNEY','pc6t':'Curriculum Vitae',
+    'pc7s':'GET IN TOUCH','pc7t':'Contact',
+  },
+  sq: {
+    'nav-about': 'Rreth Meje',
+    'nav-architecture': 'Arkitekturë',
+    'nav-freelance': 'Punë Freelance',
+    'nav-creative': 'Punë Krijuese',
+    'nav-skills': 'Aftësi',
+    'nav-cv': 'Curriculum Vitae',
+    'nav-contact': 'Kontakt',
+    'h-sub': 'DUKE PROJEKTUAR HAPËSIRA QË FRYMËZOJNË',
+    'h-tag': 'ARKITEKTURË & DIZAJN',
+    'h-cta': 'EKSPLORO PORTFOLION TIM',
+    'back-ptf': 'KTHEHU TE PORTFOLIO',
+    'back-ptf2': 'KTHEHU TE PORTFOLIO',
+    'back-ptf3': 'KTHEHU TE PORTFOLIO',
+    'back-ptf4': 'KTHEHU TE PORTFOLIO',
+    'back-ptf5': 'KTHEHU TE PORTFOLIO',
+    'back-ptf6': 'KTHEHU TE PORTFOLIO',
+    'back-ptf7': 'KTHEHU TE PORTFOLIO',
+    'back-arch': 'KTHEHU TE ARKITEKTURA',
+    'back-cv': 'KTHEHU TE CV',
+    'ptf-lbl': 'PORTFOLIO',
+    'ptf-desc': 'Një koleksion i kuruar i projekteve akademike, komisioneve freelance dhe eksperimenteve krijuese.',
+    's1': 'PROJEKTE ARKITEKTURE',
+    's2': 'SHTËPI FREELANCE',
+    's3': 'VITE MËSIMI',
+    's4': 'GJUHË',
+    'ic1l': 'ARSIMIMI', 'ic2l': 'VENDNDODHJA', 'ic3l': 'FOKUSI', 'ic4l': 'GJUHËT',
+    'wia-lbl': 'KU JAM UNE',
+    'about-quote': 'Arkitektura nuk është vetëm profesion — është arti i formësimit të përvojës njerëzore.',
+    'ab1': 'Jam Altin Ademi, student arkitekt nga Maqedonia e Veriut, aktualisht duke ndjekur Bachelor të Arkitekturës në Universitetin e Evropës Juglindore (UEJL).',
+    'ab2': 'Portofoli im përfshin projekte akademike, komisione rezidenciale freelance, hyrje në konkurse dhe eksperimente krijuese.',
+    'ab3': 'Rrjedhshëm në shqip, maqedonisht dhe anglisht, punojë nëpër kultura dhe kontekste — gjithmonë me të njëjtin qëllim: të krijojë arkitekturë të ndërgjegjshme mjedisorë.',
+    'wdm-lbl': 'ÇKA MË SHTYN',
+    'd1t': 'Dizajni Parametrik', 'd1d': 'Besoj se mjetet llogaritëse hapin forma dhe efikasitete të pamundshme të arrihen vetëm nëpërmjet intuitës.',
+    'd2t': 'Të Menduarit Të Qëndrueshëm', 'd2d': 'Çdo vendim ka pasoja mjedisore. Unë projektojë me klimën, materialin dhe ndikimin afatgjatë gjithmonë në mendje.',
+    'd3t': 'Përvoja Njerëzore', 'd3d': 'Arkitektura e madhe ndihet para se të kuptohet. Projektojë për emocione — për mënyrën sesi një hapësirë i bën njerëzit të ndihen.',
+    'apl': 'NË STUDIO',
+    'btncv': 'CURRICULUM VITAE', 'btnct': 'KONTAKT',
+    'arch-lbl': 'PROJEKTE TË VEÇUARA',
+    'arch-desc': 'Projekte akademike dhe konceptuale që eksplorojnë dizajnin e ndërtesave të larta, planifikimin urban dhe arkitekturën civile.',
+    'at1': 'PROJEKT AKADEMIK',
+    'fl-lbl': 'PUNË PER KLIENT',
+    'fl-desc': 'Komisione rezidenciale private të dizajnuara me vëmendje ndaj vizionit të klientit dhe karakterit të vendit.',
+    'cw-lbl': 'EKSPERIMENTE DIZAJNI',
+    'cw-desc': 'Një koleksion vizatimesh, eksperimentesh dixhitale, dizajni grafik dhe eksplorimesh krijuese.',
+    'sk-lbl': 'EKSPERTIZË TEKNIKE',
+    'sk-title': 'Aftësi & Ekspertizë',
+    'cc-lbl': 'KOMPETENCAT KRYESORE',
+    'cc1t': 'Dizajni i Qëndrueshëm', 'cc1d': 'Sistemet pasive, analiza bioklimatike, parimet LEED',
+    'cc2t': 'Dizajni Parametrik', 'cc2d': 'Gjenerimi i formës i drejtuar nga algoritmet',
+    'cc3t': 'Planifikimi Urban', 'cc3d': 'Masterplanifikimi, lëvizshmëria, infrastruktura e gjelbër',
+    'cc4t': 'Drejtimi Krijues', 'cc4d': 'Identiteti vizual, grafika, komunikimi i markës',
+    'asw-lbl': 'SOFTUERË ARKITEKTURE',
+    'csw-lbl': 'SOFTUERË KRIJUES',
+    'lang-lbl': 'GJUHËT',
+    'ca-lbl': 'AFTËSI KRIJUESE',
+    'cv-lbl': 'ZHVILLIMI PROFESIONAL',
+    'cv-desc': 'Qëllimet, filozofia, arritjet dhe zhvillimi profesional — një regjistër i plotë i rritjes arkitekturale.',
+    'cv1t': 'Përmbledhja & Qëllimet e Karrierës', 'cv1d': 'Çka nënkupton arkitektura për mua dhe ku e shoh veten brenda 2–5 viteve.', 'cv1l': 'HAPE →',
+    'cv2t': 'Filozofia Profesionale', 'cv2d': 'Parimet dhe vlerat që udhëzojnë çdo vendim dizajni.',
+    'cv3t': 'Biografia Profesionale', 'cv3d': 'Arsimimi, kronologjia e rritjes, konkurset dhe eksperienca.',
+    'cv4t': 'Aftësi & Cilësi', 'cv4d': 'Softuerë arkitekture, mjete krijuese dhe pikat e forta personale.',
+    'cv5t': 'Arritjet', 'cv5d': 'Konkurset, njohjjet dhe arritjet kryesore.',
+    'cv6t': 'Kërkime & Botime', 'cv6d': 'Artikuj akademikë, projekte kërkimore dhe vepra të shkruara.',
+    'cv7t': 'Konferenca & Punëtori', 'cv7d': 'Ngjarje, seminare dhe punëtori të ndjekura dhe të pjesëmarrura.',
+    'cv8t': 'Punë Vullnetare', 'cv8d': 'Kontribute komunitare, projekte sociale dhe ndikim.',
+    'cv9t': 'Artikuj & Punë Akademike', 'cv9d': 'Artikuj të botuar, raporte, botime shkollore dhe ese.',
+    'cs-title': 'Përmbledhja & Qëllimet e Karrierës',
+    'ct-lbl': 'NA KONTAKTONI',
+    'ct-title': "Le të Lidhemi",
+    'ct-desc': "Nëse keni një projekt në mendje, dëshironi të bashkëpunoni, ose thjesht dëshironi të flisni për arkitekturën — do të doja të dëgjohesha.",
+    'dc-lbl': 'KONTAKT DIREKT',
+    'sc-lbl': 'RRJETET SOCIALE',
+    'sm-lbl': 'DËRGO MESAZH',
+    'fn-lbl': 'EMRI', 'em-lbl': 'EMAIL', 'sb-lbl': 'SUBJEKTI', 'msg-lbl': 'MESAZHI',
+    'send-lbl': 'DËRGO MESAZHIN',
+    'send-ok': 'Mesazhi u dërgua! Do t\'ju kthehem së shpejti.',
+    'pc1s':'STUDENT ARKITEKT · MAQEDONIA E VERIUT','pc1t':'Rreth Meje',
+    'pc2s':'PROJEKTE TË VEÇUARA','pc2t':'Arkitekturë',
+    'pc3s':'PUNË PER KLIENT','pc3t':'Punë Freelance',
+    'pc4s':'EKSPERIMENTE DIZAJNI','pc4t':'Punë Krijuese',
+    'pc5s':'EKSPERTIZË TEKNIKE','pc5t':'Aftësi',
+    'pc6s':'UDHËTIMI PROFESIONAL','pc6t':'Curriculum Vitae',
+    'pc7s':'NA KONTAKTONI','pc7t':'Kontakt',
+  },
+  mk: {
+    'nav-about': 'За Мене',
+    'nav-architecture': 'Архитектура',
+    'nav-freelance': 'Freelance Работа',
+    'nav-creative': 'Креативна Работа',
+    'nav-skills': 'Вештини',
+    'nav-cv': 'Curriculum Vitae',
+    'nav-contact': 'Контакт',
+    'h-sub': 'ДИЗАЈНИРАЊЕ ПРОСТОРИ КОИ ИНСПИРИРААТ',
+    'h-tag': 'АРХИТЕКТУРА & ДИЗАЈН',
+    'h-cta': 'ИСТРАЖИ ГО МОЈОТ ПОРТФОЛИО',
+    'back-ptf': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-ptf2': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-ptf3': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-ptf4': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-ptf5': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-ptf6': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-ptf7': 'НАЗАД КОН ПОРТФОЛИО',
+    'back-arch': 'НАЗАД КОН АРХИТЕКТУРА',
+    'back-cv': 'НАЗАД КОН CV',
+    'ptf-lbl': 'ПОРТФОЛИО',
+    'ptf-desc': 'Куриран збир на академски проекти, фриленс нарачки и креативни експерименти кои ја истражуваат пресечната точка на форма, простор и човечко искуство.',
+    's1': 'АРХИТЕКТОНСКИ ПРОЕКТИ',
+    's2': 'ФРИЛЕНС ДОМОВИ',
+    's3': 'ГОДИНИ УЧЕЊЕ',
+    's4': 'ЈАЗИЦИ',
+    'ic1l': 'ОБРАЗОВАНИЕ', 'ic2l': 'ЛОКАЦИЈА', 'ic3l': 'ФОКУС', 'ic4l': 'ЈАЗИЦИ',
+    'wia-lbl': 'КОЈ СУМ ЈАС',
+    'about-quote': 'Архитектурата не е само професија — тоа е уметност на обликување на човечкото искуство.',
+    'ab1': 'Јас сум Алтин Адеми, студент архитект од Северна Македонија, моментално следам Bachelor по Архитектура на Југоисточниот Европски Универзитет (ЈИЕУ).',
+    'ab2': 'Мојот портфолио опфаќа академски студиски проекти, фриленс резиденцијални нарачки, учества на натпревари и креативни експерименти.',
+    'ab3': 'Течно во албански, македонски и англиски јазик, работам низ различни култури и контексти — секогаш со иста цел: да создадам архитектура која е технички ригорозна, еколошки свесна и емоционално резонантна.',
+    'wdm-lbl': 'ШТО МЕ ДВИЖИ',
+    'd1t': 'Параметриски Дизајн', 'd1d': 'Верувам дека компјутерски алатки отклучуваат форми и ефикасности кои не можат да се достигнат само со интуиција.',
+    'd2t': 'Одржливо Размислување', 'd2d': 'Секоја одлука носи еколошки последици. Дизајнирам со климата, материјалот и долгорочниот импакт секогаш на ум.',
+    'd3t': 'Човечко Искуство', 'd3d': 'Одличната архитектура се чувствува пред да се разбере. Дизајнирам за емоции — за начинот на кој просторот ги прави луѓето да се чувствуваат.',
+    'apl': 'ВО СТУДИОТО',
+    'btncv': 'CURRICULUM VITAE', 'btnct': 'КОНТАКТ',
+    'arch-lbl': 'ИСТАКНАТИ ПРОЕКТИ',
+    'arch-desc': 'Академски и концептуални проекти кои истражуваат дизајн на високи згради, урбано планирање и граѓанска архитектура.',
+    'at1': 'АКАДЕМСКИ ПРОЕКТ',
+    'fl-lbl': 'КЛИЕНТСКА РАБОТА',
+    'fl-desc': 'Приватни резиденцијални нарачки дизајнирани со внимание на визијата на клиентот и хармонијата помеѓу изградената форма и пејсажот.',
+    'cw-lbl': 'ДИЗАЈНЕРСКИ ЕКСПЕРИМЕНТИ',
+    'cw-desc': 'Збир на цртежи, дигитални експерименти, графички дизајн и креативни истражувања надвор од традиционалната архитектура.',
+    'sk-lbl': 'ТЕХНИЧКА ЕКСПЕРТИЗА',
+    'sk-title': 'Вештини & Експертиза',
+    'cc-lbl': 'ОСНОВНИ КОМПЕТЕНЦИИ',
+    'cc1t': 'Одржлив Дизајн', 'cc1d': 'Пасивни системи, биоклиматска анализа, LEED принципи',
+    'cc2t': 'Параметриски Дизајн', 'cc2d': 'Генерирање форми водено со алгоритми',
+    'cc3t': 'Урбано Планирање', 'cc3d': 'Мастерпланирање, мобилност, зелена инфраструктура',
+    'cc4t': 'Креативно Раководење', 'cc4d': 'Визуелен идентитет, графика, комуникација на бренд',
+    'asw-lbl': 'АРХИТЕКТОНСКИ СОФТВЕР',
+    'csw-lbl': 'КРЕАТИВЕН СОФТВЕР',
+    'lang-lbl': 'ЈАЗИЦИ',
+    'ca-lbl': 'КРЕАТИВНИ СПОСОБНОСТИ',
+    'cv-lbl': 'ПРОФЕСИОНАЛЕН РАЗВОЈ',
+    'cv-desc': 'Цели, филозофија, достигнувања и професионален развој — целосен запис на архитектонски раст и амбиција.',
+    'cv1t': 'Кариерно Резиме & Цели', 'cv1d': 'Што значи архитектурата за мене и каде се гледам за 2–5 години.', 'cv1l': 'ОТВОРИ →',
+    'cv2t': 'Професионална Филозофија', 'cv2d': 'Принципите и вредностите кои водат секоја дизајнерска одлука.',
+    'cv3t': 'Професионална Биографија', 'cv3d': 'Образование, временска линија на раст, натпревари и искуство.',
+    'cv4t': 'Вештини & Квалитети', 'cv4d': 'Архитектонски софтвер, креативни алатки и лични силни страни.',
+    'cv5t': 'Достигнувања', 'cv5d': 'Натпревари, признанија и пресвртни моменти.',
+    'cv6t': 'Истражувања & Публикации', 'cv6d': 'Академски написи, истражувачки проекти и пишани дела.',
+    'cv7t': 'Конференции & Работилници', 'cv7d': 'Настани, семинари и работилници посетени и учествувано.',
+    'cv8t': 'Волонтерска Работа', 'cv8d': 'Придонеси за заедницата, социјални проекти и импакт.',
+    'cv9t': 'Написи & Академска Работа', 'cv9d': 'Објавени написи, извештаи, школски публикации и есеи.',
+    'cs-title': 'Кариерно Резиме & Цели',
+    'ct-lbl': 'СТАПЕТЕ ВО КОНТАКТ',
+    'ct-title': "Ајде да се Поврземе",
+    'ct-desc': "Без разлика дали имате проект на ум, сакате да соработувате, или едноставно сакате да зборувате за архитектура — би сакал да слушнам од вас.",
+    'dc-lbl': 'ДИРЕКТЕН КОНТАКТ',
+    'sc-lbl': 'СОЦИЈАЛНИ МРЕЖИ',
+    'sm-lbl': 'ИСПРАТИ ПОРАКА',
+    'fn-lbl': 'ИМЕ', 'em-lbl': 'EMAIL', 'sb-lbl': 'ПРЕДМЕТ', 'msg-lbl': 'ПОРАКА',
+    'send-lbl': 'ИСПРАТИ ПОРАКА',
+    'send-ok': 'Пораката е испратена! Ќе ви се јавам наскоро.',
+    'pc1s':'СТУДЕНТ АРХИТЕКТ · СЕВЕРНА МАКЕДОНИЈА','pc1t':'За Мене',
+    'pc2s':'ИСТАКНАТИ ПРОЕКТИ','pc2t':'Архитектура',
+    'pc3s':'КЛИЕНТСКА РАБОТА','pc3t':'Freelance Работа',
+    'pc4s':'ДИЗАЈНЕРСКИ ЕКСПЕРИМЕНТИ','pc4t':'Креативна Работа',
+    'pc5s':'ТЕХНИЧКА ЕКСПЕРТИЗА','pc5t':'Вештини',
+    'pc6s':'ПРОФЕСИОНАЛЕН ПАТ','pc6t':'Curriculum Vitae',
+    'pc7s':'СТАПЕТЕ ВО КОНТАКТ','pc7t':'Контакт',
+  }
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === lang);
+  });
+  const t = langs[lang];
+  for (const [id, val] of Object.entries(t)) {
+    if (id === 'send-ok') continue;
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+}
+
+// ─── PAGE NAVIGATION ───
+function goTo(pageId) {
+  const prev = document.getElementById('page-' + currentPage);
+  const next = document.getElementById('page-' + pageId);
+  if (!next) return;
+
+  if (prev) {
+    prev.style.opacity = '0';
+    prev.style.transform = 'translateY(-15px)';
+    setTimeout(() => {
+      prev.classList.remove('active');
+      prev.style.opacity = '';
+      prev.style.transform = '';
+    }, 400);
+  }
+
+  setTimeout(() => {
+    next.classList.add('active');
+    next.classList.add('fade-in');
+    setTimeout(() => next.classList.remove('fade-in'), 800);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, prev ? 200 : 0);
+
+  currentPage = pageId;
+
+  // Show/hide nav
+  const showNav = pageId !== 'hero';
+  document.getElementById('main-nav').style.display = showNav ? 'flex' : 'none';
+
+  // Update active nav link
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === pageId);
+  });
+
+  // Animate progress bars when visiting skills
+  if (pageId === 'skills') {
+    setTimeout(animateBars, 400);
+  }
+}
+
+function animateBars() {
+  document.querySelectorAll('.prog-fill').forEach(bar => {
+    bar.style.width = bar.dataset.width + '%';
+  });
+}
+
+// ─── CREATIVE WORK FILTER ───
+function filterCreative(cat) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.querySelectorAll('.creative-item').forEach(item => {
+    const cats = item.dataset.cat || '';
+    if (cat === 'all' || cats.includes(cat)) {
+      item.style.display = 'block';
+      item.style.opacity = '0';
+      setTimeout(() => { item.style.transition = 'opacity 0.4s'; item.style.opacity = '1'; }, 50);
+    } else {
+      item.style.transition = 'opacity 0.3s';
+      item.style.opacity = '0';
+      setTimeout(() => item.style.display = 'none', 300);
+    }
+  });
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded', () => {
+  setLang('en');
+  // Nav links text
+  const navMap = {
+    'nav-about':'about','nav-architecture':'architecture','nav-freelance':'freelance',
+    'nav-creative':'creative','nav-skills':'skills','nav-cv':'cv'
+  };
+  // Progress bars initially at 0
+  document.querySelectorAll('.prog-fill').forEach(b => b.style.width = '0');
+});
+</script>
+</body>
+</html>

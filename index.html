@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Altin Ademi — Creative Studio</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+
+  <!-- Grain Overlay -->
+  <div class="grain"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">AA<span>.</span></a>
+    <div class="nav-links">
+      <a href="#about" class="nav-link" data-text="About">About</a>
+      <a href="#projects" class="nav-link" data-text="Work">Work</a>
+      <a href="#contact" class="nav-link" data-text="Contact">Contact</a>
+    </div>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Toggle menu">
+      <span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about" class="mobile-link">01 — About</a>
+    <a href="#projects" class="mobile-link">02 — Work</a>
+    <a href="#contact" class="mobile-link">03 — Contact</a>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-text">STUDIO</div>
+    <div class="hero-content">
+      <div class="hero-eyebrow reveal-up">
+        <span class="dot"></span>Creative Director &amp; Developer
+      </div>
+      <h1 class="hero-title">
+        <span class="line reveal-up delay-1">Crafting digital</span>
+        <span class="line reveal-up delay-2">
+          <em>experiences</em>
+          <span class="title-stroke"> that</span>
+        </span>
+        <span class="line reveal-up delay-3">leave marks.</span>
+      </h1>
+      <div class="hero-meta reveal-up delay-4">
+        <p>Based in Prishtinë, Kosovo —<br/>Available worldwide for select projects.</p>
+        <a href="#projects" class="btn-primary">View Work <span class="arrow">↓</span></a>
+      </div>
+    </div>
+    <div class="hero-scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+    <div class="hero-counter reveal-up delay-5">
+      <div class="counter-item">
+        <span class="counter-num" data-target="48">0</span>+
+        <span class="counter-label">Projects</span>
+      </div>
+      <div class="counter-divider"></div>
+      <div class="counter-item">
+        <span class="counter-num" data-target="12">0</span>+
+        <span class="counter-label">Clients</span>
+      </div>
+      <div class="counter-divider"></div>
+      <div class="counter-item">
+        <span class="counter-num" data-target="6">0</span>+
+        <span class="counter-label">Years</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-strip">
+    <div class="marquee-track">
+      <span>Brand Identity</span><span class="sep">✦</span>
+      <span>Web Design</span><span class="sep">✦</span>
+      <span>Motion</span><span class="sep">✦</span>
+      <span>UI/UX</span><span class="sep">✦</span>
+      <span>Creative Direction</span><span class="sep">✦</span>
+      <span>Typography</span><span class="sep">✦</span>
+      <span>Brand Identity</span><span class="sep">✦</span>
+      <span>Web Design</span><span class="sep">✦</span>
+      <span>Motion</span><span class="sep">✦</span>
+      <span>UI/UX</span><span class="sep">✦</span>
+      <span>Creative Direction</span><span class="sep">✦</span>
+      <span>Typography</span><span class="sep">✦</span>
+    </div>
+  </div>
+
+  <!-- About -->
+  <section class="about" id="about">
+    <div class="section-label reveal-left">
+      <span>01</span> About
+    </div>
+    <div class="about-grid">
+      <div class="about-image-wrap reveal-left">
+        <div class="about-image">
+          <div class="about-image-inner"></div>
+        </div>
+        <div class="about-image-caption">Prishtinë, Kosovo</div>
+      </div>
+      <div class="about-text">
+        <h2 class="section-title reveal-up">
+          Design is a<br/><em>conversation</em><br/>between form &amp; feeling.
+        </h2>
+        <p class="about-body reveal-up delay-1">
+          I'm Altin Ademi — a multidisciplinary designer and developer focused on building brands and digital products that resonate. I believe the best work happens at the intersection of clarity and emotion.
+        </p>
+        <p class="about-body reveal-up delay-2">
+          My process begins with listening — to the brief, the brand, and the audience. From there, I work with precision to shape something that is both beautiful and purposeful.
+        </p>
+        <div class="about-skills reveal-up delay-3">
+          <div class="skill-tag">Branding</div>
+          <div class="skill-tag">Web</div>
+          <div class="skill-tag">Motion</div>
+          <div class="skill-tag">Strategy</div>
+          <div class="skill-tag">Print</div>
+          <div class="skill-tag">Art Direction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="projects" id="projects">
+    <div class="section-label reveal-left">
+      <span>02</span> Selected Work
+    </div>
+    <div class="projects-header reveal-up">
+      <h2 class="section-title">Recent<br/><em>projects.</em></h2>
+    </div>
+
+    <div class="projects-list">
+
+      <article class="project-item reveal-up" data-index="01">
+        <div class="project-info">
+          <span class="project-num">01</span>
+          <h3 class="project-title">Forma Studio</h3>
+          <p class="project-desc">Brand identity &amp; digital presence for an architecture firm exploring materiality and space.</p>
+          <div class="project-tags">
+            <span>Branding</span><span>Web</span><span>Print</span>
+          </div>
+        </div>
+        <div class="project-visual">
+          <div class="project-img" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+            <div class="project-img-overlay">
+              <span>View Project →</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="project-item reveal-up delay-1" data-index="02">
+        <div class="project-info">
+          <span class="project-num">02</span>
+          <h3 class="project-title">Lune Collective</h3>
+          <p class="project-desc">E-commerce experience and visual language for a sustainable fashion collective.</p>
+          <div class="project-tags">
+            <span>UI/UX</span><span>Motion</span><span>Shopify</span>
+          </div>
+        </div>
+        <div class="project-visual">
+          <div class="project-img" style="background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%);">
+            <div class="project-img-overlay">
+              <span>View Project →</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="project-item reveal-up delay-2" data-index="03">
+        <div class="project-info">
+          <span class="project-num">03</span>
+          <h3 class="project-title">Veil Fragrance</h3>
+          <p class="project-desc">Luxury brand identity and packaging design for an artisanal perfume house.</p>
+          <div class="project-tags">
+            <span>Identity</span><span>Packaging</span><span>Art Direction</span>
+          </div>
+        </div>
+        <div class="project-visual">
+          <div class="project-img" style="background: linear-gradient(135deg, #4a3728 0%, #c8a97d 100%);">
+            <div class="project-img-overlay">
+              <span>View Project →</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="project-item reveal-up delay-3" data-index="04">
+        <div class="project-info">
+          <span class="project-num">04</span>
+          <h3 class="project-title">Meridian App</h3>
+          <p class="project-desc">Mobile product design and design system for a fintech startup redefining personal finance.</p>
+          <div class="project-tags">
+            <span>Product</span><span>Design System</span><span>Figma</span>
+          </div>
+        </div>
+        <div class="project-visual">
+          <div class="project-img" style="background: linear-gradient(135deg, #141e30 0%, #243b55 100%);">
+            <div class="project-img-overlay">
+              <span>View Project →</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="projects-cta reveal-up">
+      <a href="#contact" class="btn-ghost">Start a project with me <span class="arrow">→</span></a>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="services">
+    <div class="section-label reveal-left">
+      <span>03</span> Services
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal-up">
+        <span class="service-icon">◐</span>
+        <h3>Brand Identity</h3>
+        <p>Full visual identity systems — from logo to language. Built to scale and built to last.</p>
+      </div>
+      <div class="service-card reveal-up delay-1">
+        <span class="service-icon">⬡</span>
+        <h3>Web Design &amp; Dev</h3>
+        <p>High-performance websites with intentional design. Every pixel considered, every interaction crafted.</p>
+      </div>
+      <div class="service-card reveal-up delay-2">
+        <span class="service-icon">◈</span>
+        <h3>Motion &amp; 3D</h3>
+        <p>Dynamic visual storytelling through motion design, 3D elements, and immersive digital experience.</p>
+      </div>
+      <div class="service-card reveal-up delay-3">
+        <span class="service-icon">△</span>
+        <h3>Creative Direction</h3>
+        <p>Strategic creative oversight for campaigns, launches, and brand pivots that need a cohesive vision.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact" id="contact">
+    <div class="section-label reveal-left">
+      <span>04</span> Contact
+    </div>
+    <div class="contact-inner">
+      <h2 class="contact-title reveal-up">
+        Let's build<br/>something<br/><em>remarkable.</em>
+      </h2>
+      <div class="contact-right">
+        <p class="contact-sub reveal-up delay-1">
+          Have a project in mind? I'm currently accepting select clients for 2025. Reach out and let's talk.
+        </p>
+        <div class="contact-links reveal-up delay-2">
+          <a href="mailto:hello@altinAdemi.studio" class="contact-email">
+            hello@altinAdemi.studio
+            <span class="email-arrow">↗</span>
+          </a>
+        </div>
+        <div class="contact-socials reveal-up delay-3">
+          <a href="#" class="social-link">Instagram</a>
+          <a href="#" class="social-link">Twitter</a>
+          <a href="#" class="social-link">Dribbble</a>
+          <a href="#" class="social-link">LinkedIn</a>
+        </div>
+        <form class="contact-form reveal-up delay-4" id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" placeholder="Your name" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="your@email.com" autocomplete="off" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="project">Project</label>
+            <input type="text" id="project" placeholder="Tell me about your project" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="budget">Budget range</label>
+            <select id="budget">
+              <option value="" disabled selected>Select range</option>
+              <option>$2,000 – $5,000</option>
+              <option>$5,000 – $15,000</option>
+              <option>$15,000 – $30,000</option>
+              <option>$30,000+</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-submit">
+            <span>Send Message</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-top">
+      <span class="footer-logo">AA<em>.</em></span>
+      <span class="footer-copy">© 2025 Altin Ademi Studio. All rights reserved.</span>
+      <a href="#hero" class="footer-back">Back to top ↑</a>
+    </div>
+    <div class="footer-bottom">
+      <span>Designed &amp; developed with intent.</span>
+      <span>Kosovo / Worldwide</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
